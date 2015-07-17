@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="snowtech.com.py.sunshine" >
+    package="snowtech.com.py.sunshine.app" >
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
@@ -8,6 +8,7 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_USER_DICTIONARY" />
 
 
     <!-- android:debuggable="true" -->
@@ -31,7 +32,7 @@
             >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="snowtech.com.py.sunshine.MainActivity" />
+                android:value=".MainActivity" />
         </activity>
         <activity
             android:name=".SettingsActivity"
@@ -41,7 +42,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="MainActivity" /> -->
         </activity>
-        <Provider
+        <provider
             android:authorities="snowtech.com.py.sunshine.app"
             android:name=".data.WeatherProvider" />
     </application>

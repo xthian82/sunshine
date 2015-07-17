@@ -5,6 +5,6 @@
         android:id="@+id/menu_item_share"
         app:showAsAction="ifRoom"
         android:title="Share"
-        android:actionProviderClass=
+        app:actionProviderClass=
             "android.support.v7.widget.ShareActionProvider" />
 </menu><!-- From: file:/Users/cristhian/AndroidStudioProjects/Sunshine/app/src/main/res/menu/detail_fragment.xml -->
