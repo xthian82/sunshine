@@ -8,6 +8,8 @@ import android.support.v4.widget.CursorAdapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import snowtech.com.py.sunshine.app.data.WeatherContract;
 
@@ -22,6 +24,30 @@ public class ForecastAdapter extends CursorAdapter {
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
         View view = LayoutInflater.from(context).inflate(R.layout.list_item_forecast, parent, false);
+
+        //list_item_date_textview (fecha)
+        long date = cursor.getLong(ForecastFragment.COL_WEATHER_DATE);
+
+        //list_item_cast_textview
+        String cast = cursor.getString(ForecastFragment.COL_WEATHER_DESC);
+
+        double max = cursor.getDouble(ForecastFragment.COL_WEATHER_MAX_TEMP);
+        double min = cursor.getDouble(ForecastFragment.COL_WEATHER_MIN_TEMP);
+        boolean isMetric = Utility.isMetric(context);
+
+        //View root = parent.getRootView();
+
+        ImageView imgV  = (ImageView)view.findViewById(R.id.list_item_icon);
+        TextView tvDate =  (TextView)view.findViewById(R.id.list_item_date_textview);
+        TextView tvDesc =  (TextView)view.findViewById(R.id.list_item_cast_textview);
+        TextView tvMaxT =  (TextView)view.findViewById(R.id.list_item_max_textview);
+        TextView tvMinT =  (TextView)view.findViewById(R.id.list_item_min_textview);
+
+        imgV.setImageResource(R.drawable.ic_launcher);
+        tvDate.setText(Utility.getFriendlyDayString(context, date));
+        tvDesc.setText(cast);
+        tvMaxT.setText(Utility.formatTemperature(max, isMetric));
+        tvMinT.setText(Utility.formatTemperature(min, isMetric));
 
         return view;
     }

@@ -7,3 +7,5 @@
 /captures
 *.class
 *.apk
+*.log
+*.bin
