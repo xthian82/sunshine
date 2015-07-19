@@ -163,7 +163,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         tvPres.setText(Utility.formatContext(getActivity(), pressure, Utility.PRESSURE_RES));
         tvWind.setText(Utility.formatWind(getActivity(), windSpeed, windDir));
 
-        imgV.setImageResource(R.drawable.ic_launcher);
+        imgV.setImageResource(Utility.getArtResourceForWeatherCondition(id));
 
         if (mShareActionProvider != null) {
             mShareActionProvider.setShareIntent(getDefaultIntent());

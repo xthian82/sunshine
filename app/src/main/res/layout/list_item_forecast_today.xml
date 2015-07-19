@@ -41,8 +41,8 @@
         android:padding="15dp">
         <ImageView android:id="@+id/list_item_icon"
             android:layout_height="match_parent"
-            android:layout_width="match_parent"
-            android:src="@drawable/ic_launcher" />
+            android:layout_width="match_parent" />
+
         <TextView android:id="@+id/list_item_cast_textview"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

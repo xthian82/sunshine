@@ -58,13 +58,20 @@ public class ForecastAdapter extends CursorAdapter {
         //list_item_cast_textview
         String cast = cursor.getString(ForecastFragment.COL_WEATHER_DESC);
 
+        int conditionId = cursor.getInt(ForecastFragment.COL_CON_WEATH_ID);
         double max = cursor.getDouble(ForecastFragment.COL_WEATHER_MAX_TEMP);
         double min = cursor.getDouble(ForecastFragment.COL_WEATHER_MIN_TEMP);
         boolean isMetric = Utility.isMetric(context);
 
         ViewHolder viewHolder = (ViewHolder)view.getTag();
+        int viewType = getItemViewType(cursor.getPosition());
 
-        viewHolder.imgV.setImageResource(R.drawable.ic_launcher);
+
+        if (viewType == VIEW_TYPE_TODAY)
+            viewHolder.imgV.setImageResource(Utility.getArtResourceForWeatherCondition(conditionId));
+        else
+            viewHolder.imgV.setImageResource(Utility.getIconResourceForWeatherCondition(conditionId));
+
         viewHolder.tvDate.setText(Utility.getFriendlyDayString(context, date));
         viewHolder.tvDesc.setText(cast);
         viewHolder.tvMaxT.setText(Utility.formatTemperature(context, max, isMetric));
