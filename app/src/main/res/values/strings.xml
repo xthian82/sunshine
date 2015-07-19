@@ -33,6 +33,25 @@
     <string name="tomorrow">Tomorrow</string>
 
     <!-- Date format for displaying day of week and date (i.e. Mon Jun 1) [CHAR LIMIT=20] -->
-    <string name="format_full_friendly_date"><xliff:g id="day">%1$s</xliff:g>, <xliff:g id="date">%2$s</xliff:g></string>
-    Sign up for free
+    <string name="format_full_friendly_date">
+        <xliff:g id="day">%1$s</xliff:g>, <xliff:g id="date">%2$s</xliff:g>
+    </string>
+    <!-- Temperature Format -->
+    <string name="format_temperature">
+        <xliff:g id="temp">%1.0f</xliff:g>\u00B0
+    </string>
+    <!-- Humidity -->
+    <string name="format_humidity">
+        HUMIDITY: <xliff:g id="humd">%1.0f</xliff:g>%%
+    </string>
+    <!-- Wind -->
+    <string name="format_wind">
+        WIND: <xliff:g id="wind">%1.0f</xliff:g> Km/H <xliff:g id="deg">%2.0f</xliff:g>
+    </string>
+
+    <!-- Pressure -->
+    <string name="format_pressure">
+        PRESSURE: <xliff:g id="press">%1.0f</xliff:g> hPa
+    </string>
+
 </resources>

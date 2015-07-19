@@ -13,6 +13,9 @@ import java.util.Date;
  * Created by cristhian on 11/7/15.
  */
 public class Utility {
+    public final static int HUMIDITY_RES = 0;
+    public final static int PRESSURE_RES = 1;
+
     // Format used for storing dates in the database.  ALso used for converting those strings
     // back into date objects for comparison/processing.
     public static final String DATE_FORMAT = "yyyyMMdd";
@@ -28,14 +31,27 @@ public class Utility {
                 .equals(context.getString(R.string.pref_time_units_metrics));
     }
 
-    static String formatTemperature(double temperature, boolean isMetric) {
+    static String formatTemperature(Context context, double temperature, boolean isMetric) {
         double temp;
         if ( !isMetric ) {
             temp = 9*temperature/5+32;
         } else {
             temp = temperature;
         }
-        return String.format("%.0f", temp);
+        return context.getString(R.string.format_temperature, temp);
+    }
+
+    static String formatContext(Context context, float value, int resource) {
+        if (resource == HUMIDITY_RES)
+            return context.getString(R.string.format_humidity, value);
+        else if (resource == PRESSURE_RES)
+            return context.getString(R.string.format_pressure, value);
+        else
+            return null;
+    }
+
+    static String formatWind(Context context, float value1, float value2) {
+        return context.getString(R.string.format_wind, value1, value2);
     }
 
     static String formatDate(long dateInMillis) {

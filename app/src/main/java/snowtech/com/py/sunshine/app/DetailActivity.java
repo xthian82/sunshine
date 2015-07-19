@@ -2,50 +2,12 @@ package snowtech.com.py.sunshine.app;
 
 
 import android.content.Intent;
-import android.database.Cursor;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBarActivity;
-import android.support.v7.widget.ShareActionProvider;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
-
-import snowtech.com.py.sunshine.app.data.WeatherContract;
 
 
 public class DetailActivity extends ActionBarActivity {
-
-    private static String mForecastText;
-
-    private static final String[] FORECAST_COLUMNS = {
-            // In this case the id needs to be fully qualified with a table name, since
-            // the content provider joins the location & weather tables in the background
-            // (both have an _id column)
-            // On the one hand, that's annoying.  On the other, you can search the weather table
-            // using the location set by the user, which is only in the Location table.
-            // So the convenience is worth it.
-            WeatherContract.WeatherEntry.TABLE_NAME + "." + WeatherContract.WeatherEntry._ID,
-            WeatherContract.WeatherEntry.COLUMN_DATE,
-            WeatherContract.WeatherEntry.COLUMN_SHORT_DESC,
-            WeatherContract.WeatherEntry.COLUMN_MAX_TEMP,
-            WeatherContract.WeatherEntry.COLUMN_MIN_TEMP
-    };
-
-    static final int COL_WEATHER_ID = 0;
-    static final int COL_WEATHER_DATE = 1;
-    static final int COL_WEATHER_DESC = 2;
-    static final int COL_WEATHER_MAX_TEMP = 3;
-    static final int COL_WEATHER_MIN_TEMP = 4;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,7 +15,7 @@ public class DetailActivity extends ActionBarActivity {
 
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, new PlaceholderFragment())
+                    .add(R.id.container, new DetailFragment( ))
                     .commit();
         }
     }
@@ -74,6 +36,7 @@ public class DetailActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    /*
     public static class PlaceholderFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>  {
 
         private ShareActionProvider mShareActionProvider;
@@ -138,8 +101,8 @@ public class DetailActivity extends ActionBarActivity {
             String date = Utility.formatDate(data.getLong(COL_WEATHER_DATE));
             String weatherDes = data.getString(COL_WEATHER_DESC);
             boolean isMetric = Utility.isMetric(getActivity());
-            String maxTemp = Utility.formatTemperature(data.getDouble(COL_WEATHER_MAX_TEMP), isMetric);
-            String minTemp = Utility.formatTemperature(data.getDouble(COL_WEATHER_MIN_TEMP), isMetric);
+            String maxTemp = Utility.formatTemperature(getActivity().getBaseContext(), data.getDouble(COL_WEATHER_MAX_TEMP), isMetric);
+            String minTemp = Utility.formatTemperature(getActivity().getBaseContext(), data.getDouble(COL_WEATHER_MIN_TEMP), isMetric);
 
             mForecastText = String.format("%s - %s - %s/%s", date, weatherDes, maxTemp, minTemp);
 
@@ -155,5 +118,5 @@ public class DetailActivity extends ActionBarActivity {
         public void onLoaderReset(Loader<Cursor> loader) {
 
         }
-    }
+    }*/
 }
