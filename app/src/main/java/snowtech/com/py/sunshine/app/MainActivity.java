@@ -1,8 +1,12 @@
 package snowtech.com.py.sunshine.app;
 
+import android.annotation.TargetApi;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
@@ -10,11 +14,15 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import snowtech.com.py.sunshine.app.data.WeatherContract;
 
-public class MainActivity extends ActionBarActivity {
-    private static final String FORECASTFRAGMENT_TAG = "ForecastFragment";
+
+public class MainActivity extends ActionBarActivity implements ForecastFragment.Callback {
+    private static final String DETAILFRAGMENT_TAG = "DFTAG";
     private String mLocation;
     private String TAG = MainActivity.class.getSimpleName();
+    private boolean mTwoPane;
+    private ForecastFragment forecastFragment;
 
     @Override
     protected void onStart() {
@@ -46,9 +54,11 @@ public class MainActivity extends ActionBarActivity {
         super.onResume();
         Log.d(TAG, " -- onResume -- ");
         String preferedLoc = Utility.getPreferredLocation(this);
-        if (preferedLoc.equals(mLocation) == false) {
-            ForecastFragment ff = (ForecastFragment)getSupportFragmentManager().findFragmentByTag(FORECASTFRAGMENT_TAG);
-            ff.onLocationChanged(new Location(preferedLoc));
+        if (preferedLoc != null && preferedLoc.equals(mLocation) == false) {
+
+            if (forecastFragment != null) forecastFragment.onLocationChanged(new Location(preferedLoc));
+            DetailFragment df = (DetailFragment)getSupportFragmentManager().findFragmentByTag(DETAILFRAGMENT_TAG);
+            if (df != null) df.onLocationChanged(preferedLoc);
             mLocation = preferedLoc;
         }
     }
@@ -56,17 +66,23 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mLocation = Utility.getPreferredLocation(this);
         setContentView(R.layout.activity_main);
-        if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, new ForecastFragment(), FORECASTFRAGMENT_TAG)
-                    .commit();
+
+        if (findViewById(R.id.weather_detail_container) != null) {
+            mTwoPane = true;
+            if (savedInstanceState == null) {
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.weather_detail_container, new DetailFragment(), DETAILFRAGMENT_TAG)
+                        .commit();
+            }
+        } else {
+            mTwoPane = false;
+            getSupportActionBar().setElevation(0f);
         }
 
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-
-        mLocation = sharedPreferences.getString(getString(R.string.pref_location_key), getString(R.string.pref_location_default));
-
+        forecastFragment = (ForecastFragment)getSupportFragmentManager().findFragmentById(R.id.fragment_forecast);
+        forecastFragment.setUseTodayLayout(!mTwoPane);
         Log.d(TAG, " -- onCreate -- ");
     }
 
@@ -94,5 +110,21 @@ public class MainActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onItemSelected(Uri dateUri) {
+        if (mTwoPane) {
+            Bundle args = new Bundle();
+            args.putParcelable(DetailFragment.DETAIL_URI, dateUri);
+            DetailFragment df = new DetailFragment();
+            df.setArguments(args);
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.weather_detail_container, df, DETAILFRAGMENT_TAG)
+                    .commit();
+        } else  {
+            Intent detailIntent = new Intent(this, DetailActivity.class);
 
+            detailIntent.setData(dateUri);
+            startActivity(detailIntent);
+        }
+    }
 }

@@ -2,8 +2,10 @@ package snowtech.com.py.sunshine.app;
 
 import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+//import android.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -16,6 +18,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import snowtech.com.py.sunshine.app.data.WeatherContract;
@@ -24,6 +27,9 @@ import snowtech.com.py.sunshine.app.data.WeatherContract;
  * Created by cristhian on 18/7/15.
  */
 public class DetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+    public static final String DETAIL_URI = "URI";
+
+    private static final int DETAIL_LOADER = 0;
     private static String mForecastText;
     private TextView tvDate;
     private TextView tvMaxT;
@@ -34,6 +40,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     private TextView tvPres;
     private ImageView imgV;
     private TextView tvDatF;
+    private Uri mUri;
 
     private static final String[] FORECAST_COLUMNS = {
             // In this case the id needs to be fully qualified with a table name, since
@@ -85,18 +92,47 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
         View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
 
-         getLoaderManager().initLoader(1, null, this);
-         tvDate = (TextView)rootView.findViewById(R.id.date_text_detail);
-         tvMaxT = (TextView)rootView.findViewById(R.id.max_text_detail);
-         tvMinT = (TextView)rootView.findViewById(R.id.min_text_detail);
-         tvDesc = (TextView)rootView.findViewById(R.id.desc_text_detail);
-         tvHumi = (TextView)rootView.findViewById(R.id.humidity_text_detail);
-         tvWind = (TextView)rootView.findViewById(R.id.wind_text_detail);
-         tvPres = (TextView)rootView.findViewById(R.id.pressure_text_detail);
-         tvDatF = (TextView)rootView.findViewById(R.id.datefriend_text_detail);
-         imgV = (ImageView)rootView.findViewById(R.id.img_detail);
+        Bundle arguments = getArguments();
+        if (arguments != null) {
+            mUri = arguments.getParcelable(DETAIL_URI);
+        }
+
+        tvDate = (TextView)rootView.findViewById(R.id.date_text_detail);
+        tvMaxT = (TextView)rootView.findViewById(R.id.max_text_detail);
+        tvMinT = (TextView)rootView.findViewById(R.id.min_text_detail);
+        tvDesc = (TextView)rootView.findViewById(R.id.desc_text_detail);
+        tvHumi = (TextView)rootView.findViewById(R.id.humidity_text_detail);
+        tvWind = (TextView)rootView.findViewById(R.id.wind_text_detail);
+        tvPres = (TextView)rootView.findViewById(R.id.pressure_text_detail);
+        tvDatF = (TextView)rootView.findViewById(R.id.datefriend_text_detail);
+        imgV = (ImageView)rootView.findViewById(R.id.img_detail);
+
 
         return rootView;
+    }
+
+    void onLocationChanged(String location) {
+        Uri uri = mUri;
+        if (uri != null) {
+            long date = WeatherContract.WeatherEntry.getDateFromUri(uri);
+            Uri updateUri = WeatherContract.WeatherEntry.buildWeatherLocationWithDate(location, date);
+
+            if (updateUri != null) {
+                mUri = updateUri;
+                getLoaderManager().restartLoader(DETAIL_LOADER, null, this);
+            }
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        getLoaderManager().initLoader(DETAIL_LOADER, null, this);
     }
 
     @Override
@@ -116,11 +152,9 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        Intent intent = getActivity().getIntent();
+        if (mUri == null) return null;
 
-        if (intent == null) return null;
-
-        return new CursorLoader(getActivity(), intent.getData(),
+        return new CursorLoader(getActivity(), mUri,
                 FORECAST_COLUMNS, null, null, null);
     }
 
@@ -128,16 +162,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
 
         if (!data.moveToFirst()) return;
-
-//        tvDate = (TextView)getView().findViewById(R.id.date_text_detail);
-//        tvMaxT = (TextView)getView().findViewById(R.id.max_text_detail);
-//        tvMinT = (TextView)getView().findViewById(R.id.min_text_detail);
-//        tvDesc = (TextView)getView().findViewById(R.id.desc_text_detail);
-//        tvHumi = (TextView)getView().findViewById(R.id.humidity_text_detail);
-//        tvWind = (TextView)getView().findViewById(R.id.wind_text_detail);
-//        tvPres = (TextView)getView().findViewById(R.id.pressure_text_detail);
-//        tvDatF = (TextView)getView().findViewById(R.id.datefriend_text_detail);
-//        imgV = (ImageView)getView().findViewById(R.id.img_detail);
 
         long date = data.getLong(COL_WEATHER_DATE);
         String friendlyDateText = Utility.getDayName(getActivity(), date);
