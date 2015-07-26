@@ -5,7 +5,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-//import android.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -18,10 +17,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import snowtech.com.py.sunshine.app.data.WeatherContract;
+
+//import android.app.Fragment;
 
 /**
  * Created by cristhian on 18/7/15.
@@ -188,6 +188,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         tvWind.setText(Utility.formatWind(getActivity(), windSpeed, windDir));
 
         imgV.setImageResource(Utility.getArtResourceForWeatherCondition(id));
+        imgV.setContentDescription(weatherDes);
 
         if (mShareActionProvider != null) {
             mShareActionProvider.setShareIntent(getDefaultIntent());
