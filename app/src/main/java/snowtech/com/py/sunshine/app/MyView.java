@@ -38,6 +38,7 @@ public class MyView extends View {
 
     @Override
     public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent ev) {
-        ev.getText().add(windSpeedDir);
+        //ev.getText().add(windSpeedDir);
+        return false;
     }
 }

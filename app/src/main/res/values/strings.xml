@@ -57,4 +57,7 @@
         Pressure: <xliff:g id="press">%1.0f</xliff:g> hPa
     </string>
 
+    <string name="sync_account_type">sunshine.snowtech.com.py</string>
+    <string name="content_authority">snowtech.com.py.sunshine.app</string>
+
 </resources>

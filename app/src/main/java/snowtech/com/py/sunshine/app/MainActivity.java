@@ -15,6 +15,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import snowtech.com.py.sunshine.app.data.WeatherContract;
+import snowtech.com.py.sunshine.app.service.SunshineService;
 
 
 public class MainActivity extends ActionBarActivity implements ForecastFragment.Callback {
@@ -83,7 +84,10 @@ public class MainActivity extends ActionBarActivity implements ForecastFragment.
 
         forecastFragment = (ForecastFragment)getSupportFragmentManager().findFragmentById(R.id.fragment_forecast);
         forecastFragment.setUseTodayLayout(!mTwoPane);
-        Log.d(TAG, " -- onCreate -- ");
+
+
+        Intent serviceSunshine = new Intent(this, SunshineService.class);
+        startService(serviceSunshine);
     }
 
     @Override
