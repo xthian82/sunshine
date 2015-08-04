@@ -2,17 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="snowtech.com.py.sunshine.app" >
 
-    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
-    <!--
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_USER_DICTIONARY" />
-    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" /> -->
-
     <!-- Permissions required by the sync adapter -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.READ_SYNC_SETTINGS"/>
     <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS"/>
     <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS"/>
@@ -50,12 +43,6 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="MainActivity" /> -->
         </activity>
-
-        <service android:name=".service.SunshineService">
-        </service>
-
-        <receiver android:name=".service.SunshineService$AlarmReceiver">
-        </receiver>
 
         <!-- SyncAdapter's dummy authentication service -->
         <service android:name=".sync.SunshineAuthenticatorService">

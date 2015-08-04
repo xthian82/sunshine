@@ -80,14 +80,14 @@ public class ForecastAdapter extends CursorAdapter {
 
         viewHolder.tvDate.setText(Utility.getFriendlyDayString(context, date));
         viewHolder.tvDesc.setText(cast);
-        viewHolder.tvMaxT.setText(Utility.formatTemperature(context, max, isMetric));
-        viewHolder.tvMinT.setText(Utility.formatTemperature(context, min, isMetric));
+        viewHolder.tvMaxT.setText(Utility.formatTemperature(context, max));
+        viewHolder.tvMinT.setText(Utility.formatTemperature(context, min));
     }
 
     //Prepare the weather high/lows for presentation.
     private String formatHighLows(double high, double low) {
         boolean isMetric = Utility.isMetric(mContext);
-        String highLowStr = Utility.formatTemperature(mContext, high, isMetric) + "/" + Utility.formatTemperature(mContext, low, isMetric);
+        String highLowStr = Utility.formatTemperature(mContext, high) + "/" + Utility.formatTemperature(mContext, low);
         return highLowStr;
     }
 

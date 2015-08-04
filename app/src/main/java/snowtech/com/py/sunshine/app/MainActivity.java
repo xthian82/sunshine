@@ -1,21 +1,15 @@
 package snowtech.com.py.sunshine.app;
 
-import android.annotation.TargetApi;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import snowtech.com.py.sunshine.app.data.WeatherContract;
-import snowtech.com.py.sunshine.app.service.SunshineService;
+import snowtech.com.py.sunshine.app.sync.SunshineSyncAdapter;
 
 
 public class MainActivity extends ActionBarActivity implements ForecastFragment.Callback {
@@ -84,10 +78,7 @@ public class MainActivity extends ActionBarActivity implements ForecastFragment.
 
         forecastFragment = (ForecastFragment)getSupportFragmentManager().findFragmentById(R.id.fragment_forecast);
         forecastFragment.setUseTodayLayout(!mTwoPane);
-
-
-        Intent serviceSunshine = new Intent(this, SunshineService.class);
-        startService(serviceSunshine);
+        SunshineSyncAdapter.initializeSyncAdapter(this);
     }
 
     @Override
