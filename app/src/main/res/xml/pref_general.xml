@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-<EditTextPreference
+    <EditTextPreference
         android:key="@string/pref_location_key"
         android:title="@string/pref_location_label"
         android:defaultValue="@string/pref_location_default"
@@ -15,8 +15,13 @@
         android:key="@string/pref_time_units_key"
         android:title="@string/pref_time_units_label"
         android:entries="@array/pref_time_units_entries"
-        android:entryValues="@array/pref_time_units_values">
+        android:entryValues="@array/pref_time_units_values"
+        android:summaryOn="enabled"
+        android:summaryOff="not enabled">
 
     </ListPreference>
 
+    <CheckBoxPreference android:defaultValue="@string/pref_notification_default"
+        android:key="@string/pref_notification_key"
+        android:title="@string/pref_notificate_user" />
 </PreferenceScreen>
