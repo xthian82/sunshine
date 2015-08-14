@@ -10,6 +10,7 @@
     <string name="pref_location_key" translatable="false">location</string>
     <string name="pref_location_label">Location</string>
     <string name="pref_location_default" translatable="false">2420,py</string>
+    <string name="pref_location_status_key">loc-status</string>
 
     <string name="pref_time_units_key" translatable="false">timeUnit</string>
     <string name="pref_time_units_label">Temperature Units</string>
@@ -70,5 +71,8 @@
     <string name="pref_notificate_user">Notificate User</string>
 
     <string name="pref_notification_default">true</string>
+
+    <string name="no_info_available">No weather information available</string>
+    <string name="no_network_connection">No network connection available</string>
 
 </resources>
