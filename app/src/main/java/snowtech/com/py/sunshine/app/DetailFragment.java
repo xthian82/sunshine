@@ -19,6 +19,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+
 import snowtech.com.py.sunshine.app.data.WeatherContract;
 
 //import android.app.Fragment;
@@ -184,9 +186,15 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         tvDesc.setText(weatherDes);
         tvHumi.setText(Utility.formatContext(getActivity(), humidity, Utility.HUMIDITY_RES));
         tvPres.setText(Utility.formatContext(getActivity(), pressure, Utility.PRESSURE_RES));
-        tvWind.setText(Utility.formatWind(getActivity(), windSpeed, windDir));
+        tvWind.setText(Utility.getFormattedWind(getActivity(), windSpeed, windDir));
 
-        imgV.setImageResource(Utility.getArtResourceForWeatherCondition(id));
+        //imgV.setImageResource(Utility.getArtResourceForWeatherCondition(id));
+        Glide.with(this)
+                .load(Utility.getArtUrlForWeatherCondition(getActivity(), id))
+                .error(Utility.getArtResourceForWeatherCondition(id))
+                .crossFade()
+                .into(imgV);
+
         imgV.setContentDescription(weatherDes);
 
         //---------------------------------------------------------------------

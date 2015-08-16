@@ -2,6 +2,7 @@ package snowtech.com.py.sunshine.app.sync;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.annotation.SuppressLint;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.AbstractThreadedSyncAdapter;
@@ -14,8 +15,11 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SyncRequest;
 import android.content.SyncResult;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -25,6 +29,8 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.text.format.Time;
 import android.util.Log;
+
+import com.bumptech.glide.Glide;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -39,6 +45,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Vector;
+import java.util.concurrent.ExecutionException;
 
 import snowtech.com.py.sunshine.app.MainActivity;
 import snowtech.com.py.sunshine.app.R;
@@ -362,6 +369,10 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         String lastNotificationKey = context.getString(R.string.pref_last_notification);
         long lastSync = prefs.getLong(lastNotificationKey, 0);
+        Boolean notificate = prefs.getBoolean(context.getString(R.string.pref_notification_key),
+                Boolean.parseBoolean(context.getString(R.string.pref_notification_default)));
+
+        if (!notificate) return;
 
         if (System.currentTimeMillis() - lastSync >= DAY_IN_MILLIS) {
             // Last sync was more than 1 day ago, let's send a notification with the weather.
@@ -378,7 +389,7 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
                 double low = cursor.getDouble(INDEX_MIN_TEMP);
                 String desc = cursor.getString(INDEX_SHORT_DESC);
 
-                int iconId = Utility.getIconResourceForWeatherCondition(weatherId);
+                //int iconId = Utility.getIconResourceForWeatherCondition(weatherId);
                 String title = context.getString(R.string.app_name);
 
                 // Define the text of the forecast.
@@ -388,7 +399,7 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
                         Utility.formatTemperature(context, low));
 
                 //build your notification here.
-                sendNotification(iconId, title, contentText);
+                sendNotification(weatherId, title, contentText);
 
                 //refreshing last sync
                 SharedPreferences.Editor editor = prefs.edit();
@@ -554,19 +565,48 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
         ep.commit();
     }
 
-    private void sendNotification(int iconId, String title, String contentText) {
+    private void sendNotification(int weatherId, String title, String contentText) {
         Context context = getContext();
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        Boolean notificate = prefs.getBoolean(context.getString(R.string.pref_notification_key),
-                Boolean.parseBoolean(context.getString(R.string.pref_notification_default)));
 
-        if (!notificate) return;
+
+        int iconId = Utility.getIconResourceForWeatherCondition(weatherId);
+        Resources resources = context.getResources();
+        int artResourceId = Utility.getArtResourceForWeatherCondition(weatherId);
+        String artUrl = Utility.getArtUrlForWeatherCondition(context, weatherId);
+
+        // On Honeycomb and higher devices, we can retrieve the size of the large icon
+        // Prior to that, we use a fixed size
+        @SuppressLint("InlinedApi")
+        int largeIconWidth = Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB
+                ? resources.getDimensionPixelSize(android.R.dimen.notification_large_icon_width)
+                : resources.getDimensionPixelSize(R.dimen.notification_large_icon_default);
+        @SuppressLint("InlinedApi")
+        int largeIconHeight = Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB
+                ? resources.getDimensionPixelSize(android.R.dimen.notification_large_icon_height)
+                : resources.getDimensionPixelSize(R.dimen.notification_large_icon_default);
+
+        // Retrieve the large icon
+        Bitmap largeIcon;
+        try {
+            largeIcon = Glide.with(context)
+                    .load(artUrl)
+                    .asBitmap()
+                    .error(artResourceId)
+                    .fitCenter()
+                    .into(largeIconWidth, largeIconHeight).get();
+        } catch (InterruptedException | ExecutionException e) {
+            Log.e(LOG_TAG, "Error retrieving large icon from " + artUrl, e);
+            largeIcon = BitmapFactory.decodeResource(resources, artResourceId);
+        }
 
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(getContext())
-                        .setSmallIcon(iconId)
-                        .setContentTitle(title)
-                        .setContentText(contentText);
+                .setColor(resources.getColor(R.color.sunshine_light_blue))
+                .setSmallIcon(iconId)
+                .setLargeIcon(largeIcon)
+                .setContentTitle(title)
+                .setContentText(contentText);
 
 
         // Creates an explicit intent for an Activity in your app
@@ -584,7 +624,7 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
         // Adds the Intent that starts the Activity to the top of the stack
         stackBuilder.addNextIntent(resultIntent);
         PendingIntent resultPendingIntent = stackBuilder.
-                getPendingIntent(0, PendingIntent.FLAG_CANCEL_CURRENT);
+                getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
 
         mBuilder.setContentIntent(resultPendingIntent);
 

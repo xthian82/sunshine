@@ -11,6 +11,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+
 /**
  * Created by cristhian on 11/7/15.
  */
@@ -72,11 +74,18 @@ public class ForecastAdapter extends CursorAdapter {
         ViewHolder viewHolder = (ViewHolder)view.getTag();
         int viewType = getItemViewType(cursor.getPosition());
 
+        int fallBackIcon;
 
         if (viewType == VIEW_TYPE_TODAY)
-            viewHolder.imgV.setImageResource(Utility.getArtResourceForWeatherCondition(conditionId));
+            fallBackIcon = Utility.getArtResourceForWeatherCondition(conditionId);
         else
-            viewHolder.imgV.setImageResource(Utility.getIconResourceForWeatherCondition(conditionId));
+            fallBackIcon = Utility.getIconResourceForWeatherCondition(conditionId);
+
+        Glide.with(context)
+                .load(Utility.getArtUrlForWeatherCondition(context, conditionId))
+                .error(fallBackIcon)
+                .crossFade()
+                .into(viewHolder.imgV);
 
         viewHolder.tvDate.setText(Utility.getFriendlyDayString(context, date));
         viewHolder.tvDesc.setText(cast);
