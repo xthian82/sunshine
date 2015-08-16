@@ -67,7 +67,7 @@ public class ForecastAdapter extends CursorAdapter {
         int conditionId = cursor.getInt(ForecastFragment.COL_CON_WEATH_ID);
         double max = cursor.getDouble(ForecastFragment.COL_WEATHER_MAX_TEMP);
         double min = cursor.getDouble(ForecastFragment.COL_WEATHER_MIN_TEMP);
-        boolean isMetric = Utility.isMetric(context);
+        //boolean isMetric = Utility.isMetric(context);
 
         ViewHolder viewHolder = (ViewHolder)view.getTag();
         int viewType = getItemViewType(cursor.getPosition());
@@ -82,6 +82,15 @@ public class ForecastAdapter extends CursorAdapter {
         viewHolder.tvDesc.setText(cast);
         viewHolder.tvMaxT.setText(Utility.formatTemperature(context, max));
         viewHolder.tvMinT.setText(Utility.formatTemperature(context, min));
+
+        // For accessibility, we don't want a content description for the icon field
+        // because the information is repeated in the description view and the icon
+        // is not individually selectable
+
+        viewHolder.tvDesc.setContentDescription(context.getString(R.string.a11y_forecast, cast));
+        viewHolder.tvMaxT.setContentDescription(context.getString(R.string.a11y_high_temp, max));
+        viewHolder.tvMinT.setContentDescription(context.getString(R.string.a11y_low_temp, min));
+
     }
 
     //Prepare the weather high/lows for presentation.

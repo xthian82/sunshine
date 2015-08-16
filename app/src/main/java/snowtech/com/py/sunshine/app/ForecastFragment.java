@@ -180,6 +180,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         }
 
         mForecastAdapter.setUseTodayLayout(mUseTodayLayout);
+        listView.smoothScrollToPosition(0);
 
         return rootView;
     }
@@ -255,6 +256,8 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
             // If we don't need to restart the loader, and there's a desired position to restore
             // to, do so now.
             listView.smoothScrollToPosition(mPosition);
+        else
+            listView.smoothScrollToPosition(0);
 
         updateView();
     }
@@ -304,5 +307,9 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (key.equals(getString(R.string.pref_location_status_key)))
             updateView();
+    }
+
+    public void setItemSelected(int itemSelected) {
+        listView.smoothScrollToPosition(itemSelected);
     }
 }

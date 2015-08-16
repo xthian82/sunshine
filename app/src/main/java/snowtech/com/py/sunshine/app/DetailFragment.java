@@ -117,10 +117,9 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             long date = WeatherContract.WeatherEntry.getDateFromUri(uri);
             Uri updateUri = WeatherContract.WeatherEntry.buildWeatherLocationWithDate(location, date);
 
-            if (updateUri != null) {
-                mUri = updateUri;
-                getLoaderManager().restartLoader(DETAIL_LOADER, null, this);
-            }
+            mUri = updateUri;
+            getLoaderManager().restartLoader(DETAIL_LOADER, null, this);
+
         }
     }
 
@@ -131,8 +130,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
         getLoaderManager().initLoader(DETAIL_LOADER, null, this);
+        super.onActivityCreated(savedInstanceState);
     }
 
     @Override
@@ -161,13 +160,13 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
 
-        if (!data.moveToFirst()) return;
+        if (data != null && !data.moveToFirst()) return;
 
         long date = data.getLong(COL_WEATHER_DATE);
         String friendlyDateText = Utility.getDayName(getActivity(), date);
         String dateText = Utility.getFormattedMonthDay(getActivity(), date);
         String weatherDes = data.getString(COL_WEATHER_DESC);
-        boolean isMetric = Utility.isMetric(getActivity());
+        //boolean isMetric = Utility.isMetric(getActivity());
         String maxTemp = Utility.formatTemperature(getActivity(), data.getDouble(COL_WEATHER_MAX_TEMP));
         String minTemp = Utility.formatTemperature(getActivity(), data.getDouble(COL_WEATHER_MIN_TEMP));
         int id = data.getInt(COL_WEATHER_WEATH_ID);
@@ -189,6 +188,26 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
         imgV.setImageResource(Utility.getArtResourceForWeatherCondition(id));
         imgV.setContentDescription(weatherDes);
+
+        //---------------------------------------------------------------------
+        // Read weather condition ID from cursor
+
+        tvDesc.setContentDescription(getString(R.string.a11y_forecast, weatherDes));
+
+        // For accessibility, add a content description to the icon field. Because the ImageView
+        // is independently focusable, it's better to have a description of the image. Using
+        // null is appropriate when the image is purely decorative or when the image already
+        // has text describing it in the same UI component.
+
+        tvMaxT.setContentDescription(getString(R.string.a11y_high_temp, maxTemp));
+        tvMinT.setContentDescription(getString(R.string.a11y_low_temp, minTemp));
+        tvHumi.setContentDescription(tvHumi.getText());
+        tvWind.setContentDescription(tvWind.getText());
+        tvPres.setContentDescription(tvPres.getText());
+
+
+
+        //=========================================================================
 
         if (mShareActionProvider != null) {
             mShareActionProvider.setShareIntent(getDefaultIntent());

@@ -20,8 +20,7 @@
         android:id="@+id/date_text_detail"
         android:padding="5dp"
         android:fontFamily="sans-serif-condensed"
-        android:textSize="24sp"
-        android:text="June 25"/>
+        />
     <!-- Today -->
     <TextView
         android:layout_width="wrap_content"
@@ -31,7 +30,7 @@
         android:fontFamily="sans-serif-condensed"
         android:textSize="16dp"
         android:textColor="@color/grey_700"
-        android:text="Today"
+
         />
 
     <!-- Main content: high, low, art, weather state -->
@@ -55,7 +54,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/max_text_detail"
-                android:text="24"
                 android:fontFamily="sans-serif-light"
                 android:textSize="96sp" />
 
@@ -64,7 +62,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/min_text_detail"
-                android:text="16"
                 android:fontFamily="sans-serif-light"
                 android:textSize="48sp"
                 android:layout_gravity="center_horizontal"
@@ -92,7 +89,7 @@
                 android:textAppearance="?android:textAppearanceLarge"
                 android:textColor="@color/grey_700"
                 android:id="@+id/desc_text_detail"
-                android:text="Clear"/>
+                />
         </LinearLayout>
     </LinearLayout>
 
@@ -108,14 +105,13 @@
             android:layout_height="wrap_content"
             android:id="@+id/humidity_text_detail"
             android:textAppearance="?android:textAppearanceLarge"
-            android:text="Humidity: 100%"/>
+            />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/wind_text_detail"
             android:textAppearance="?android:textAppearanceLarge"
-            android:text="Wind: 2Km/H NE"
             android:layout_marginTop="4dp"/>
 
         <TextView
@@ -123,7 +119,6 @@
             android:layout_height="wrap_content"
             android:id="@+id/pressure_text_detail"
             android:textAppearance="?android:textAppearanceLarge"
-            android:text="Pressure: 1020 hPa"
             android:layout_marginTop="4dp"/>
 
     </LinearLayout>

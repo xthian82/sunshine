@@ -21,7 +21,6 @@
                 android:id="@+id/date_text_detail"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="June 25"
                 android:fontFamily="sans-serif-condensed"
                 android:minWidth="120dp"
                 android:textSize="24sp"/>
@@ -30,7 +29,6 @@
                 android:id="@+id/datefriend_text_detail"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Today"
                 android:fontFamily="sans-serif-condensed"
                 android:textColor="@color/grey_700"
                 android:textSize="20sp"/>
@@ -51,7 +49,7 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif-light"
                 android:textSize="96sp"
-                android:text="24"/>
+                />
 
             <!-- Min Temp. -->
             <TextView
@@ -61,7 +59,7 @@
                 android:textSize="48sp"
                 android:textColor="@color/grey_700"
                 android:layout_marginLeft="8dp"
-                android:text="16"/>
+                />
 
             <!-- Humidity, wind, pressure -->
             <TextView
@@ -71,7 +69,7 @@
                 android:fontFamily="sans-serif-condensed"
                 android:textAppearance="?android:textAppearanceLarge"
                 android:layout_marginTop="4dp"
-                android:text="Humidity: 100%"/>
+                />
 
             <TextView
                 android:id="@+id/pressure_text_detail"
@@ -80,7 +78,7 @@
                 android:fontFamily="sans-serif-condensed"
                 android:textAppearance="?android:textAppearanceLarge"
                 android:layout_marginTop="4dp"
-                android:text="Pressure: 1020 hPa"/>
+                />
 
             <TextView
                 android:id="@+id/wind_text_detail"
@@ -89,7 +87,7 @@
                 android:fontFamily="sans-serif-condensed"
                 android:textAppearance="?android:textAppearanceLarge"
                 android:layout_marginTop="4dp"
-                android:text="Wind: 2Km/H NE"/>
+                />
         </LinearLayout>
 
         <LinearLayout
@@ -102,8 +100,7 @@
             <ImageView
                 android:id="@+id/img_detail"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/art_clear"/>
+                android:layout_height="wrap_content" />
 
             <TextView
                 android:id="@+id/desc_text_detail"
@@ -112,7 +109,7 @@
                 android:fontFamily="sans-serif-condensed"
                 android:textColor="@color/grey_700"
                 android:textAppearance="?android:textAppearanceLarge"
-                android:text="Clear" />
+                 />
         </LinearLayout>
     </LinearLayout>
 </ScrollView>
