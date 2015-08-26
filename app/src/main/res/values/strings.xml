@@ -77,24 +77,10 @@
     <string name="format_temperature">
         <xliff:g id="temp">%1.0f</xliff:g>\u00B0
     </string>
-    <!-- Humidity -->
-    <string name="format_humidity">
-        Humidity: <xliff:g id="humd">%1.0f</xliff:g>%%
-    </string>
+
     <!-- Wind -->
     <string name="format_wind">
         Wind: <xliff:g id="wind">%1.0f</xliff:g> Km/H <xliff:g id="deg">%2.0f</xliff:g>
-    </string>
-
-    <!-- Windspeed formats -->
-    <!-- Wind in mph [CHAR LIMIT=25] -->
-    <string name="format_wind_mph">Wind: <xliff:g id="speed">%1$1.0f</xliff:g> mph <xliff:g id="direction">%2$s</xliff:g></string>
-    <!-- Wind in kph [CHAR LIMIT=25] -->
-    <string name="format_wind_kmh">Wind: <xliff:g id="speed">%1$1.0f</xliff:g> km/h <xliff:g id="direction">%2$s</xliff:g></string>
-
-    <!-- Pressure -->
-    <string name="format_pressure">
-        Pressure: <xliff:g id="press">%1.0f</xliff:g> hPa
     </string>
 
     <string name="sync_account_type">sunshine.snowtech.com.py</string>
@@ -187,4 +173,20 @@
     <string name="condition_962">Hurricane</string>
 
     <string name="condition_unknown">Unknown (<xliff:g id="low">%1$s</xliff:g>)</string>
+
+    <string name="wind">Wind</string>
+    <!-- Windspeed formats -->
+    <!-- Wind in mph [CHAR LIMIT=25] -->
+    <string name="format_wind_mph"><xliff:g id="speed">%1$1.0f</xliff:g> mph <xliff:g id="direction">%2$s</xliff:g></string>
+    <!-- Wind in kph [CHAR LIMIT=25] -->
+    <string name="format_wind_kmh"><xliff:g id="speed">%1$1.0f</xliff:g> km/h <xliff:g id="direction">%2$s</xliff:g></string>
+
+    <string name="pressure">Pressure</string>
+    <!-- Pressure format CHAR LIMIT=25] -->
+    <string name="format_pressure"><xliff:g id="pressure">%1.0f</xliff:g> hPa</string>
+
+    <string name="humidity">Humidity</string>
+    <!-- Humidity format CHAR LIMIT=25]-->
+    <string name="format_humidity"><xliff:g id="humidity">%1.0f</xliff:g> %%</string>
+
 </resources>

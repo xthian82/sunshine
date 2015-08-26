@@ -14,7 +14,7 @@
         android:layout_height="wrap_content">
 
         <ImageView android:id="@+id/list_item_icon"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_width="wrap_content"
             android:adjustViewBounds="true"
             android:layout_gravity="center" />
@@ -52,13 +52,13 @@
 
         <TextView android:id="@+id/list_item_max_textview"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_gravity="center"
             />
 
         <TextView android:id="@+id/list_item_min_textview"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_gravity="center"
             />
     </LinearLayout>

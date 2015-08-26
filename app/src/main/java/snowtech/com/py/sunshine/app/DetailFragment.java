@@ -41,7 +41,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     private TextView tvWind;
     private TextView tvPres;
     private ImageView imgV;
-    private TextView tvDatF;
+    //private TextView tvDatF;
     private Uri mUri;
 
     private static final String[] FORECAST_COLUMNS = {
@@ -106,7 +106,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         tvHumi = (TextView)rootView.findViewById(R.id.humidity_text_detail);
         tvWind = (TextView)rootView.findViewById(R.id.wind_text_detail);
         tvPres = (TextView)rootView.findViewById(R.id.pressure_text_detail);
-        tvDatF = (TextView)rootView.findViewById(R.id.datefriend_text_detail);
+        //tvDatF = (TextView)rootView.findViewById(R.id.datefriend_text_detail);
         imgV = (ImageView)rootView.findViewById(R.id.img_detail);
 
 
@@ -180,7 +180,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         mForecastText = String.format("%s - %s - %s/%s", date, weatherDes, maxTemp, minTemp);
 
         tvDate.setText(dateText);
-        tvDatF.setText(friendlyDateText);
+       // tvDatF.setText(friendlyDateText);
         tvMaxT.setText(maxTemp);
         tvMinT.setText(minTemp);
         tvDesc.setText(weatherDes);

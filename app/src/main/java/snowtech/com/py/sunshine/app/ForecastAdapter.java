@@ -87,6 +87,7 @@ public class ForecastAdapter extends CursorAdapter {
                 .crossFade()
                 .into(viewHolder.imgV);
 
+        viewHolder.imgV.setImageResource(fallBackIcon);
         viewHolder.tvDate.setText(Utility.getFriendlyDayString(context, date));
         viewHolder.tvDesc.setText(cast);
         viewHolder.tvMaxT.setText(Utility.formatTemperature(context, max));

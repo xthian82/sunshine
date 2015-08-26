@@ -5,7 +5,6 @@ import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.preference.PreferenceManager;
-import android.support.v4.app.FragmentActivity;
 import android.text.format.Time;
 
 import java.text.DateFormat;
@@ -473,5 +472,18 @@ public class Utility {
                 return context.getString(R.string.condition_unknown, weatherId);
         }
         return context.getString(stringId);
+    }
+
+    /**
+     * Helper method to return whether or not Sunshine is using local graphics.
+     *
+     * @param context Context to use for retrieving the preference
+     * @return true if Sunshine is using local graphics, false otherwise.
+     */
+    public static boolean usingLocalGraphics(Context context) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        String sunshineArtPack = context.getString(R.string.pref_art_pack_sunshine);
+        return prefs.getString(context.getString(R.string.pref_art_pack_key),
+                sunshineArtPack).equals(sunshineArtPack);
     }
 }
