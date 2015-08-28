@@ -1,5 +1,6 @@
 package snowtech.com.py.sunshine.app;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -8,7 +9,7 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -22,16 +23,11 @@ import java.io.IOException;
 
 import snowtech.com.py.sunshine.app.sync.SunshineSyncAdapter;
 
+public class MainActivity extends AppCompatActivity implements ForecastFragment.Callback {
 
-public class MainActivity extends ActionBarActivity implements ForecastFragment.Callback {
+    private final String LOG_TAG = MainActivity.class.getSimpleName();
     private static final String DETAILFRAGMENT_TAG = "DFTAG";
-    private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
-    private String mLocation;
-    private String TAG = MainActivity.class.getSimpleName();
-    private boolean mTwoPane;
-    private ForecastFragment forecastFragment;
-    private GoogleCloudMessaging mGcm;
-
+    private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     public static final String PROPERTY_REG_ID = "registration_id";
     private static final String PROPERTY_APP_VERSION = "appVersion";
 
@@ -41,30 +37,16 @@ public class MainActivity extends ActionBarActivity implements ForecastFragment.
      */
     static final String PROJECT_NUMBER = "834474781719";
 
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        Log.d(TAG, " -- onResume -- ");
-        String preferedLoc = Utility.getPreferredLocation(this);
-        if (preferedLoc != null && preferedLoc.equals(mLocation) == false) {
-
-            ForecastFragment ff = (ForecastFragment)getSupportFragmentManager().findFragmentById(R.id.fragment_forecast);
-            if ( null != ff ) {
-                ff.onLocationChanged();
-            }
-            DetailFragment df = (DetailFragment)getSupportFragmentManager().findFragmentByTag(DETAILFRAGMENT_TAG);
-            if (df != null) df.onLocationChanged(preferedLoc);
-            mLocation = preferedLoc;
-        }
-    }
+    private boolean mTwoPane;
+    private String mLocation;
+    private GoogleCloudMessaging mGcm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mLocation = Utility.getPreferredLocation(this);
-        setContentView(R.layout.activity_main);
 
+        setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
@@ -87,132 +69,37 @@ public class MainActivity extends ActionBarActivity implements ForecastFragment.
             getSupportActionBar().setElevation(0f);
         }
 
-        forecastFragment = (ForecastFragment)getSupportFragmentManager().findFragmentById(R.id.fragment_forecast);
+        ForecastFragment forecastFragment =  ((ForecastFragment)getSupportFragmentManager()
+                .findFragmentById(R.id.fragment_forecast));
         forecastFragment.setUseTodayLayout(!mTwoPane);
+
         SunshineSyncAdapter.initializeSyncAdapter(this);
 
-        //if google play services is not available, some features,
-        //such as GCM-powered weather objects, will not be available.
-
+        // If Google Play Services is not available, some features, such as GCM-powered weather
+        // alerts, will not be available.
         if (checkPlayServices()) {
             mGcm = GoogleCloudMessaging.getInstance(this);
-            String regId = getRegistrationId(getApplicationContext());
+            String regId = getRegistrationId(this);
 
-            if (regId.isEmpty()) {
-                registerInBackground(getApplicationContext());
+            if (PROJECT_NUMBER.equals("Your Project Number")) {
+                new AlertDialog.Builder(this)
+                .setTitle("Needs Project Number")
+                .setMessage("GCM will not function in Sunshine until you set the Project Number to the one from the Google Developers Console.")
+                .setPositiveButton(android.R.string.ok, null)
+                .create().show();
+            } else if (regId.isEmpty()) {
+                registerInBackground(this);
             }
         } else {
-            Log.i(TAG, "No valid Google Play Services APK");
-            //Store regId as null
-            storeRegistrationId(getApplicationContext(), null);
+            Log.i(LOG_TAG, "No valid Google Play Services APK. Weather alerts will be disabled.");
+            // Store regID as null
+            storeRegistrationId(this, null);
         }
     }
-
-    private void registerInBackground(final Context context) {
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... params) {
-                String msg = "";
-                try {
-                    if (mGcm == null) {
-                        mGcm = GoogleCloudMessaging.getInstance(context);
-                    }
-                    String regId = mGcm.register(PROJECT_NUMBER);
-                    msg = "Device registered, registration ID=" + regId;
-
-                    //Persist the registration ID - no need to register again
-                    storeRegistrationId(context, regId);
-                } catch (IOException ex) {
-                    msg = "Error :" + ex.getMessage();
-                }
-                return null;
-            }
-        }.execute(null, null, null);
-    }
-
-    /**
-     * Check the device to make sure it has the Google Play Services APK. If
-     * it doesn't, display a dialog that allows users to download the APK from
-     * the Google Play Store or enable it in the device's system settings.
-     */
-    private boolean checkPlayServices() {
-        int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
-        if (resultCode != ConnectionResult.SUCCESS) {
-            if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
-                GooglePlayServicesUtil.getErrorDialog(resultCode, this, PLAY_SERVICES_RESOLUTION_REQUEST).show();
-            } else {
-                Log.i(TAG, "This device is not supported.");
-                finish();
-            }
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * Gets the current registration ID for application on GCM service.
-     * <p>
-     * If result is empty, the app needs to register.
-     *
-     * @return registration ID, or empty string if there is no existing
-     *         registration ID.
-     */
-    private String getRegistrationId(Context context) {
-        final SharedPreferences prefs = getSharedPreferences(MainActivity.class.getSimpleName(), Context.MODE_PRIVATE);
-        String registrationId = prefs.getString(PROPERTY_REG_ID, "");
-        if (registrationId.isEmpty()) {
-            Log.i(TAG, "GCM Registration not found.");
-            return "";
-        }
-
-        // Check if app was updated; if so, it must clear the registration ID
-        // since the existing registration ID is not guaranteed to work with
-        // the new app version.
-        int registeredVersion = prefs.getInt(PROPERTY_APP_VERSION, Integer.MIN_VALUE);
-        int currentVersion = getAppVersion(context);
-        if (registeredVersion != currentVersion) {
-            Log.i(TAG, "App version changed.");
-            return "";
-        }
-
-        return registrationId;
-    }
-
-    /**
-     * Stores the registration ID and app versionCode in the application's
-     * {@code SharedPreferences}.
-     *
-     * @param context application's context.
-     * @param regId registration ID
-     */
-    private void storeRegistrationId(Context context, String regId) {
-        final SharedPreferences prefs = getSharedPreferences(MainActivity.class.getSimpleName(), Context.MODE_PRIVATE);
-        int appVersion = getAppVersion(context);
-        Log.i(TAG, "Saving regId on app version " + appVersion + " ************************ " + regId);
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putString(PROPERTY_REG_ID, regId);
-        editor.putInt(PROPERTY_APP_VERSION, appVersion);
-        editor.commit();
-    }
-
-    /**
-     * @return Application's version code from the {@code PackageManager}.
-     */
-    private static int getAppVersion(Context context) {
-        try {
-            PackageInfo packageInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
-            return packageInfo.versionCode;
-        } catch (PackageManager.NameNotFoundException e) {
-            // Should never happen. WHAT DID YOU DO?!?!
-            throw new RuntimeException("Could not get package name: " + e);
-        }
-    }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        //menu.clear();
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
@@ -229,25 +116,182 @@ public class MainActivity extends ActionBarActivity implements ForecastFragment.
             startActivity(new Intent(this, SettingsActivity.class));
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
     @Override
-    public void onItemSelected(Uri dateUri) {
-        if (mTwoPane) {
-            Bundle args = new Bundle();
-            args.putParcelable(DetailFragment.DETAIL_URI, dateUri);
-            DetailFragment df = new DetailFragment();
-            df.setArguments(args);
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.weather_detail_container, df, DETAILFRAGMENT_TAG)
-                    .commit();
-        } else  {
-            Intent detailIntent = new Intent(this, DetailActivity.class);
+    protected void onResume() {
+        super.onResume();
 
-            detailIntent.setData(dateUri);
-            startActivity(detailIntent);
+        // If Google Play Services is not available, some features, such as GCM-powered weather
+        // alerts, will not be available.
+        if (!checkPlayServices()) {
+            // Store regID as null
         }
+
+        String location = Utility.getPreferredLocation(this);
+        // update the location in our second pane using the fragment manager
+        if (location != null && !location.equals(mLocation)) {
+            ForecastFragment ff = (ForecastFragment)getSupportFragmentManager().findFragmentById(R.id.fragment_forecast);
+            if ( null != ff ) {
+                ff.onLocationChanged();
+            }
+            DetailFragment df = (DetailFragment)getSupportFragmentManager().findFragmentByTag(DETAILFRAGMENT_TAG);
+            if ( null != df ) {
+                df.onLocationChanged(location);
+            }
+            mLocation = location;
+        }
+    }
+
+    @Override
+    public void onItemSelected(Uri contentUri) {
+        if (mTwoPane) {
+            // In two-pane mode, show the detail view in this activity by
+            // adding or replacing the detail fragment using a
+            // fragment transaction.
+            Bundle args = new Bundle();
+            args.putParcelable(DetailFragment.DETAIL_URI, contentUri);
+
+            DetailFragment fragment = new DetailFragment();
+            fragment.setArguments(args);
+
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.weather_detail_container, fragment, DETAILFRAGMENT_TAG)
+                    .commit();
+        } else {
+            Intent intent = new Intent(this, DetailActivity.class)
+                    .setData(contentUri);
+            startActivity(intent);
+        }
+    }
+
+    /**
+     * Check the device to make sure it has the Google Play Services APK. If
+     * it doesn't, display a dialog that allows users to download the APK from
+     * the Google Play Store or enable it in the device's system settings.
+     */
+    private boolean checkPlayServices() {
+        int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+        if (resultCode != ConnectionResult.SUCCESS) {
+            if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
+                GooglePlayServicesUtil.getErrorDialog(resultCode, this,
+                        PLAY_SERVICES_RESOLUTION_REQUEST).show();
+            } else {
+                Log.i(LOG_TAG, "This device is not supported.");
+                finish();
+            }
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Gets the current registration ID for application on GCM service.
+     * <p>
+     * If result is empty, the app needs to register.
+     *
+     * @return registration ID, or empty string if there is no existing
+     *         registration ID.
+     */
+    private String getRegistrationId(Context context) {
+        final SharedPreferences prefs = getGCMPreferences(context);
+        String registrationId = prefs.getString(PROPERTY_REG_ID, "");
+        if (registrationId.isEmpty()) {
+            Log.i(LOG_TAG, "GCM Registration not found.");
+            return "";
+        }
+
+        // Check if app was updated; if so, it must clear the registration ID
+        // since the existing registration ID is not guaranteed to work with
+        // the new app version.
+        int registeredVersion = prefs.getInt(PROPERTY_APP_VERSION, Integer.MIN_VALUE);
+        int currentVersion = getAppVersion(context);
+        if (registeredVersion != currentVersion) {
+            Log.i(LOG_TAG, "App version changed.");
+            return "";
+        }
+        return registrationId;
+    }
+
+    /**
+     * @return Application's {@code SharedPreferences}.
+     */
+    private SharedPreferences getGCMPreferences(Context context) {
+        // Sunshine persists the registration ID in shared preferences, but
+        // how you store the registration ID in your app is up to you. Just make sure
+        // that it is private!
+        return getSharedPreferences(MainActivity.class.getSimpleName(), Context.MODE_PRIVATE);
+    }
+
+    /**
+     * @return Application's version code from the {@code PackageManager}.
+     */
+    private static int getAppVersion(Context context) {
+        try {
+            PackageInfo packageInfo = context.getPackageManager()
+                    .getPackageInfo(context.getPackageName(), 0);
+            return packageInfo.versionCode;
+        } catch (PackageManager.NameNotFoundException e) {
+            // Should never happen. WHAT DID YOU DO?!?!
+            throw new RuntimeException("Could not get package name: " + e);
+        }
+    }
+
+    /**
+     * Registers the application with GCM servers asynchronously.
+     * <p>
+     * Stores the registration ID and app versionCode in the application's
+     * shared preferences.
+     */
+    private void registerInBackground(final Context context) {
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+                String msg = "";
+                try {
+                    if (mGcm == null) {
+                        mGcm = GoogleCloudMessaging.getInstance(context);
+                    }
+                    String regId = mGcm.register(PROJECT_NUMBER);
+                    msg = "Device registered, registration ID=" + regId;
+
+                    // You should send the registration ID to your server over HTTP,
+                    // so it can use GCM/HTTP or CCS to send messages to your app.
+                    // The request to your server should be authenticated if your app
+                    // is using accounts.
+                    //sendRegistrationIdToBackend();
+                    // For this demo: we don't need to send it because the device
+                    // will send upstream messages to a server that echo back the
+                    // message using the 'from' address in the message.
+
+                    // Persist the registration ID - no need to register again.
+                    storeRegistrationId(context, regId);
+                } catch (IOException ex) {
+                    msg = "Error :" + ex.getMessage();
+                    // TODO: If there is an error, don't just keep trying to register.
+                    // Require the user to click a button again, or perform
+                    // exponential back-off.
+                }
+                return null;
+            }
+        }.execute(null, null, null);
+    }
+
+    /**
+     * Stores the registration ID and app versionCode in the application's
+     * {@code SharedPreferences}.
+     *
+     * @param context application's context.
+     * @param regId registration ID
+     */
+    private void storeRegistrationId(Context context, String regId) {
+        final SharedPreferences prefs = getGCMPreferences(context);
+        int appVersion = getAppVersion(context);
+        Log.i(LOG_TAG, "Saving regId on app version " + appVersion);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString(PROPERTY_REG_ID, regId);
+        editor.putInt(PROPERTY_APP_VERSION, appVersion);
+        editor.commit();
     }
 }

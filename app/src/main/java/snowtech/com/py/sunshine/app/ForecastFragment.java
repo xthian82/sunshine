@@ -10,6 +10,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -25,17 +26,21 @@ import snowtech.com.py.sunshine.app.sync.SunshineSyncAdapter;
 
 
 /**
- * A placeholder fragment containing a simple view.
+ * Encapsulates fetching the forecast and displaying it as a {@link ListView} layout.
  */
 public class ForecastFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>, SharedPreferences.OnSharedPreferenceChangeListener {
-    private static final int LOADER_ID = 0;
-    private static final String POSITION_KEY = "poskey";
-    private int mPosition = 0;
+    public static final String LOG_TAG = ForecastFragment.class.getSimpleName();
     private ForecastAdapter mForecastAdapter;
-    private ListView listView;
+
+    private ListView mListView;
+    private int mPosition = ListView.INVALID_POSITION;
     private boolean mUseTodayLayout;
 
-    //private Location location;
+    private static final String SELECTED_KEY = "selected_position";
+
+    private static final int FORECAST_LOADER = 0;
+    // For the forecast view we're showing only a small subset of the stored data.
+    // Specify the columns we need.
     private static final String[] FORECAST_COLUMNS = {
             // In this case the id needs to be fully qualified with a table name, since
             // the content provider joins the location & weather tables in the background
@@ -51,10 +56,8 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
             WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING,
             WeatherContract.WeatherEntry.COLUMN_WEATHER_ID,
             WeatherContract.LocationEntry.COLUMN_COORD_LAT,
-            WeatherContract.LocationEntry.COLUMN_COORD_LONG,
-            WeatherContract.WeatherEntry.COLUMN_WEATHER_ID
+            WeatherContract.LocationEntry.COLUMN_COORD_LONG
     };
-
 
     // These indices are tied to FORECAST_COLUMNS.  If FORECAST_COLUMNS changes, these
     // must change.
@@ -67,7 +70,6 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     static final int COL_WEATHER_CONDITION_ID = 6;
     static final int COL_COORD_LAT = 7;
     static final int COL_COORD_LONG = 8;
-    static final int COL_CON_WEATH_ID = 9;
 
     /**
      * A callback interface that all activities containing this fragment must
@@ -107,7 +109,6 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         inflater.inflate(R.menu.forecastfragment, menu);
     }
 
@@ -117,54 +118,49 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
 //        if (id == R.id.action_refresh) {
 //            updateWeather();
 //            return true;
-//        } else
-        if (id == R.id.action_map_location) {
-            openPreferedLocationInMap();
+//        }
+        if (id == R.id.action_map) {
+            openPreferredLocationInMap();
             return true;
         }
 
         return super.onOptionsItemSelected(item);
     }
 
-//    private void updateWeather() {
-//        SunshineSyncAdapter.syncImmediately(getActivity());
-//    }
-
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
+        // The ForecastAdapter will take data from a source and
+        // use it to populate the ListView it's attached to.
         mForecastAdapter = new ForecastAdapter(getActivity(), null, 0);
 
-        //getLoaderManager().initLoader(LOADER_ID, null, this);
-
-        if (savedInstanceState != null && savedInstanceState.containsKey(POSITION_KEY))
-            mPosition = savedInstanceState.getInt(POSITION_KEY);
-
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-        listView = (ListView) rootView.findViewById(R.id.listview_forecast);
-        listView.setEmptyView(rootView.findViewById(R.id.text_empty_list));
-        listView.setAdapter(mForecastAdapter);
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+        // Get a reference to the ListView, and attach this adapter to it.
+        mListView = (ListView) rootView.findViewById(R.id.listview_forecast);
+        View emptyView = rootView.findViewById(R.id.listview_forecast_empty);
+        mListView.setEmptyView(emptyView);
+        mListView.setAdapter(mForecastAdapter);
+        // We'll call our MainActivity
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
                 // CursorAdapter returns a cursor at the correct position for getItem(), or null
                 // if it cannot seek to that position.
                 Cursor cursor = (Cursor) adapterView.getItemAtPosition(position);
-
                 if (cursor != null) {
                     String locationSetting = Utility.getPreferredLocation(getActivity());
-                    ((Callback) getActivity()).onItemSelected(WeatherContract.WeatherEntry.buildWeatherLocationWithDate(
-                            locationSetting, cursor.getLong(COL_WEATHER_DATE)));
-
+                    ((Callback) getActivity())
+                            .onItemSelected(WeatherContract.WeatherEntry.buildWeatherLocationWithDate(
+                                    locationSetting, cursor.getLong(COL_WEATHER_DATE)
+                            ));
                 }
                 mPosition = position;
-
             }
         });
 
@@ -173,64 +169,66 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         // does crazy lifecycle related things.  It should feel like some stuff stretched out,
         // or magically appeared to take advantage of room, but data or place in the app was never
         // actually *lost*.
-        if (savedInstanceState != null && savedInstanceState.containsKey(POSITION_KEY)) {
+        if (savedInstanceState != null && savedInstanceState.containsKey(SELECTED_KEY)) {
             // The listview probably hasn't even been populated yet.  Actually perform the
             // swapout in onLoadFinished.
-            mPosition = savedInstanceState.getInt(POSITION_KEY);
+            mPosition = savedInstanceState.getInt(SELECTED_KEY);
         }
 
         mForecastAdapter.setUseTodayLayout(mUseTodayLayout);
-        listView.smoothScrollToPosition(0);
 
         return rootView;
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
-        getLoaderManager().initLoader(LOADER_ID, null, this);
+        getLoaderManager().initLoader(FORECAST_LOADER, null, this);
         super.onActivityCreated(savedInstanceState);
     }
 
     // since we read the location when we create the loader, all we need to do is restart things
     void onLocationChanged( ) {
-        getLoaderManager().restartLoader(LOADER_ID, null, this);
+        getLoaderManager().restartLoader(FORECAST_LOADER, null, this);
     }
 
-    private void openPreferedLocationInMap() {
-        if (mForecastAdapter == null) return;
-        Cursor c = mForecastAdapter.getCursor();
+    private void openPreferredLocationInMap() {
+        // Using the URI scheme for showing a location found on a map.  This super-handy
+        // intent can is detailed in the "Common Intents" page of Android's developer site:
+        // http://developer.android.com/guide/components/intents-common.html#Maps
+        if ( null != mForecastAdapter ) {
+            Cursor c = mForecastAdapter.getCursor();
+            if ( null != c ) {
+                c.moveToPosition(0);
+                String posLat = c.getString(COL_COORD_LAT);
+                String posLong = c.getString(COL_COORD_LONG);
+                Uri geoLocation = Uri.parse("geo:" + posLat + "," + posLong);
 
-        if (c != null) {
-            c.moveToPosition(0);
-            String lat = c.getString(COL_COORD_LAT);
-            String lon = c.getString(COL_COORD_LONG);
-            String uriLocation = "geo:"+lat+","+lon+"?";
-            Intent intent = new Intent(Intent.ACTION_VIEW);
-            //SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setData(geoLocation);
 
-            //String location = sharedPreferences.getString(getString(R.string.pref_location_key), getString(R.string.pref_location_default));
-            Uri uri = Uri.parse(uriLocation);
-            //.buildUpon()
-            //     .appendQueryParameter("q", location)
-            //      .build();
-            intent.setData(uri);
-            if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
-                startActivity(intent);
+                if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
+                    startActivity(intent);
+                } else {
+                    Log.d(LOG_TAG, "Couldn't call " + geoLocation.toString() + ", no receiving apps installed!");
+                }
             }
+
         }
     }
 
     @Override
-    public  void onSaveInstanceState(Bundle args) {
+    public void onSaveInstanceState(Bundle outState) {
         // When tablets rotate, the currently selected list item needs to be saved.
         // When no item is selected, mPosition will be set to Listview.INVALID_POSITION,
         // so check for that before storing.
-        if (mPosition != ListView.INVALID_POSITION) args.putInt(POSITION_KEY, mPosition);
-        super.onSaveInstanceState(args);
+        if (mPosition != ListView.INVALID_POSITION) {
+            outState.putInt(SELECTED_KEY, mPosition);
+        }
+        super.onSaveInstanceState(outState);
     }
 
     @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
         // This is called when a new Loader needs to be created.  This
         // fragment only uses one loader, so we don't care about checking the id.
 
@@ -244,22 +242,23 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         Uri weatherForLocationUri = WeatherContract.WeatherEntry.buildWeatherLocationWithStartDate(
                 locationSetting, System.currentTimeMillis());
 
-        return new CursorLoader(getActivity(), weatherForLocationUri,
-                FORECAST_COLUMNS, null, null, sortOrder);
+        return new CursorLoader(getActivity(),
+                weatherForLocationUri,
+                FORECAST_COLUMNS,
+                null,
+                null,
+                sortOrder);
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         mForecastAdapter.swapCursor(data);
-
-        if (mPosition != ListView.INVALID_POSITION)
+        if (mPosition != ListView.INVALID_POSITION) {
             // If we don't need to restart the loader, and there's a desired position to restore
             // to, do so now.
-            listView.smoothScrollToPosition(mPosition);
-        else
-            listView.smoothScrollToPosition(0);
-
-        updateView();
+            mListView.smoothScrollToPosition(mPosition);
+        }
+        updateEmptyView();
     }
 
     @Override
@@ -269,47 +268,47 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
 
     public void setUseTodayLayout(boolean useTodayLayout) {
         mUseTodayLayout = useTodayLayout;
-
-        if (mForecastAdapter != null)
-            mForecastAdapter.setUseTodayLayout(useTodayLayout);
+        if (mForecastAdapter != null) {
+            mForecastAdapter.setUseTodayLayout(mUseTodayLayout);
+        }
     }
 
-    private void updateView() {
-        TextView textView = (TextView) getView().findViewById(R.id.text_empty_list);
-
-        if (textView == null) return;
-
-        if (mForecastAdapter.getCount() < 1) {
-            int locationStatus = Utility.getLocationStatus(getActivity());
-
-            switch (locationStatus) {
-                case SunshineSyncAdapter.LOCATION_STATUS_OK:
-                    break;
-                case SunshineSyncAdapter.LOCATION_STATUS_SERVER_DOWN:
-                    textView.setText(R.string.empty_forecast_list_server_down);
-                    break;
-                case SunshineSyncAdapter.LOCATION_STATUS_SERVER_INVALID:
-                    textView.setText(R.string.empty_forecast_list_server_error);
-                    break;
-                case SunshineSyncAdapter.LOCATION_STATUS_INVALID:
-                    textView.setText(R.string.empty_forecast_list_invalid_location);
-                    break;
-                default:
-                    if (!Utility.isNetworkAvailable(getActivity()))
-                        textView.setText(R.string.empty_forecast_list_no_network);
-                    break;
+    /*
+        Updates the empty list view with contextually relevant information that the user can
+        use to determine why they aren't seeing weather.
+     */
+    private void updateEmptyView() {
+        if ( mForecastAdapter.getCount() == 0 ) {
+            TextView tv = (TextView) getView().findViewById(R.id.listview_forecast_empty);
+            if ( null != tv ) {
+                // if cursor is empty, why? do we have an invalid location
+                int message = R.string.empty_forecast_list;
+                @SunshineSyncAdapter.LocationStatus int location = Utility.getLocationStatus(getActivity());
+                switch (location) {
+                    case SunshineSyncAdapter.LOCATION_STATUS_SERVER_DOWN:
+                        message = R.string.empty_forecast_list_server_down;
+                        break;
+                    case SunshineSyncAdapter.LOCATION_STATUS_SERVER_INVALID:
+                        message = R.string.empty_forecast_list_server_error;
+                        break;
+                    case SunshineSyncAdapter.LOCATION_STATUS_INVALID:
+                        message = R.string.empty_forecast_list_invalid_location;
+                        break;
+                    default:
+                        if (!Utility.isNetworkAvailable(getActivity()) ) {
+                            message = R.string.empty_forecast_list_no_network;
+                        }
+                }
+                tv.setText(message);
             }
         }
-
     }
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if (key.equals(getString(R.string.pref_location_status_key)))
-            updateView();
+        if ( key.equals(getString(R.string.pref_location_status_key)) ) {
+            updateEmptyView();
+        }
     }
 
-    public void setItemSelected(int itemSelected) {
-        listView.smoothScrollToPosition(itemSelected);
-    }
 }

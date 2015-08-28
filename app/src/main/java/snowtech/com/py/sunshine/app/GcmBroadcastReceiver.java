@@ -11,12 +11,7 @@ import android.util.Log;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
-
-/**
- * Created by Casa on 20/08/2015.
- */
 public class GcmBroadcastReceiver extends BroadcastReceiver {
-
     private final String LOG_TAG = BroadcastReceiver.class.getSimpleName();
 
     private static final String EXTRA_SENDER = "from";
@@ -24,6 +19,7 @@ public class GcmBroadcastReceiver extends BroadcastReceiver {
     private static final String EXTRA_LOCATION = "location";
 
     public static final int NOTIFICATION_ID = 1;
+    private NotificationManager mNotificationManager;
 
     public GcmBroadcastReceiver() {
         super();
@@ -58,27 +54,25 @@ public class GcmBroadcastReceiver extends BroadcastReceiver {
         }
     }
 
+    // Put the message into a notification and post it.
+    // This is just one simple example of what you might choose to do with a GCM message.
     private void sendNotification(Context context, String msg) {
+        mNotificationManager = (NotificationManager)
+                context.getSystemService(Context.NOTIFICATION_SERVICE);
 
-        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context)
-                .setSmallIcon(R.drawable.art_storm)
-                .setContentTitle("Weather Alert!")
-                .setContentText(msg)
-                .setStyle(new NotificationCompat.BigTextStyle().bigText(msg))
-                .setPriority(NotificationCompat.PRIORITY_HIGH);
+        PendingIntent contentIntent =
+                PendingIntent.getActivity(context, 0, new Intent(context, MainActivity.class), 0);
 
-        // Creates an explicit intent for an Activity in your app
-        Intent resultIntent = new Intent(context, MainActivity.class);
+        NotificationCompat.Builder mBuilder =
+                new NotificationCompat.Builder(context)
+                        .setSmallIcon(R.drawable.art_storm)
+                        .setContentTitle("Weather Alert!")
+                        .setStyle(new NotificationCompat.BigTextStyle()
+                                .bigText(msg))
+                        .setContentText(msg)
+                        .setPriority(NotificationCompat.PRIORITY_HIGH);
 
-
-        PendingIntent resultPendingIntent = PendingIntent.getActivity(context, 0, resultIntent, 0);
-
-        mBuilder.setContentIntent(resultPendingIntent);
-
-        NotificationManager mNotificationManager = (NotificationManager)context
-                .getSystemService(Context.NOTIFICATION_SERVICE);
-
-        // mId allows you to update the notification later on.
+        mBuilder.setContentIntent(contentIntent);
         mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());
     }
 }

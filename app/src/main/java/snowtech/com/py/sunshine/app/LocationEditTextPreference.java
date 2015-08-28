@@ -12,60 +12,58 @@ import android.util.AttributeSet;
 import android.widget.Button;
 import android.widget.EditText;
 
-/**
- * Created by Casa on 15/08/2015.
- */
 public class LocationEditTextPreference extends EditTextPreference {
+    static final private int DEFAULT_MINIMUM_LOCATION_LENGTH = 2;
     private int mMinLength;
-    private static final int DEFAULT_MIN_LOCATION_LENGTH = 3;
+
     public LocationEditTextPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
         TypedArray a = context.getTheme().obtainStyledAttributes(
                 attrs,
                 R.styleable.LocationEditTextPreference,
-                0,
-                0);
-
+                0, 0);
         try {
-            mMinLength = a.getInteger(R.styleable.LocationEditTextPreference_minLength, DEFAULT_MIN_LOCATION_LENGTH);
+            mMinLength = a.getInteger(R.styleable.LocationEditTextPreference_minLength, DEFAULT_MINIMUM_LOCATION_LENGTH);
         } finally {
             a.recycle();
         }
     }
 
+
     @Override
-    public void showDialog(Bundle bundle) {
-        super.showDialog(bundle);
-        final Dialog d = getDialog();
-        final EditText editText = this.getEditText();
+    protected void showDialog(Bundle state) {
+        super.showDialog(state);
 
-        editText.addTextChangedListener(
-                new TextWatcher() {
-                    @Override
-                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        EditText et = getEditText();
+        et.addTextChangedListener(new TextWatcher() {
 
-                    }
 
-                    @Override
-                    public void onTextChanged(CharSequence s, int start, int before, int count) {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
-                    }
+            }
 
-                    @Override
-                    public void afterTextChanged(Editable s) {
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
 
-                        if (d instanceof AlertDialog) {
-                            AlertDialog dialog = (AlertDialog)d;
-                            Button positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+            }
 
-                            if (editText.getText().length() < mMinLength) {
-                                positiveButton.setEnabled(false);
-                            } else {
-                                positiveButton.setEnabled(true);
-                            }
-                        }
+            @Override
+            public void afterTextChanged(Editable s) {
+                Dialog d = getDialog();
+                if (d instanceof AlertDialog) {
+                    AlertDialog dialog = (AlertDialog) d;
+                    Button positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                    // Check if the EditText is empty
+                    if (s.length() < mMinLength) {
+                        // Disable OK button
+                        positiveButton.setEnabled(false);
+                    } else {
+                        // Re-enable the button.
+                        positiveButton.setEnabled(true);
                     }
                 }
-        );
+            }
+        });
     }
 }
