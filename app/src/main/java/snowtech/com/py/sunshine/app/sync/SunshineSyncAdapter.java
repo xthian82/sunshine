@@ -50,7 +50,6 @@ import snowtech.com.py.sunshine.app.MainActivity;
 import snowtech.com.py.sunshine.app.R;
 import snowtech.com.py.sunshine.app.Utility;
 import snowtech.com.py.sunshine.app.data.WeatherContract;
-import snowtech.com.py.sunshine.app.data.WeatherDbHelper;
 
 
 public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
@@ -117,12 +116,14 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
             final String FORMAT_PARAM = "mode";
             final String UNITS_PARAM = "units";
             final String DAYS_PARAM = "cnt";
+            final String APP_ID = "APPID";
 
             Uri builtUri = Uri.parse(FORECAST_BASE_URL).buildUpon()
                     .appendQueryParameter(QUERY_PARAM, locationQuery)
                     .appendQueryParameter(FORMAT_PARAM, format)
                     .appendQueryParameter(UNITS_PARAM, units)
                     .appendQueryParameter(DAYS_PARAM, Integer.toString(numDays))
+                    .appendQueryParameter(APP_ID, getContext().getString(R.string.open_map_api_key))
                     .build();
 
             URL url = new URL(builtUri.toString());
